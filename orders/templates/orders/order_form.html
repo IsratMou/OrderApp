@@ -3,288 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <title>New Order</title>
-    <!-- Tailwind (CDN, easiest) -->
+    <!-- Tailwind (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+        body {
+            -webkit-font-smoothing: antialiased;
+        }
+        /* Global input look: modern, premium, dark */
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            border-radius: 0.9rem !important;
+            background-color: #020617 !important; /* slate-950 */
+            border: 1px solid #1f2937 !important; /* slate-800/700 */
+            color: #e5e7eb !important;           /* slate-200 */
+            padding: 0.65rem 0.9rem !important;
+            font-size: 0.95rem !important;
+            transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+        }
+        input::placeholder,
+        textarea::placeholder {
+            color: #64748b !important; /* slate-500 */
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none !important;
+            border-color: #6366f1 !important;    /* indigo-500 */
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.7) !important;
+            background-color: #020617 !important;
+        }
+        select {
+            padding-right: 2.2rem !important;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%),
+                              linear-gradient(135deg, #6b7280 50%, transparent 50%);
+            background-position: calc(100% - 14px) calc(50% - 2px),
+                                 calc(100% - 10px) calc(50% - 2px);
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-<div class="max-w-5xl mx-auto py-8 px-4">
-    <h1 class="text-2xl font-bold mb-6 text-center">New Order</h1>
+<body class="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
 
-    <div class="bg-white shadow rounded-lg p-4 sm:p-6">
-        <!-- Tabs -->
-        <div class="border-b border-gray-200 mb-4">
-            <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-                <button type="button" id="tab-btn-customer"
-                        class="tab-btn border-indigo-500 text-indigo-600 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm"
-                        onclick="showTab('customer')">
-                    1. Customer
-                </button>
-                <button type="button" id="tab-btn-products"
-                        class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm"
-                        onclick="showTab('products')">
-                    2. Products
-                </button>
-                <button type="button" id="tab-btn-delivery"
-                        class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm"
-                        onclick="showTab('delivery')">
-                    3. Delivery & Submit
-                </button>
-            </nav>
+<div class="min-h-screen flex flex-col items-center">
+    <!-- App header -->
+    <header class="w-full max-w-4xl px-4 pt-6 pb-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-2xl bg-indigo-500 flex items-center justify-center text-white font-semibold shadow-lg">
+                OA
+            </div>
+            <div>
+                <p class="text-sm font-semibold tracking-wide text-slate-100">OrderApp</p>
+                <p class="text-[11px] text-slate-400">Fast multi‑product order entry</p>
+            </div>
         </div>
+        <span class="text-[11px] text-slate-500 hidden sm:inline">
+            v1.0
+        </span>
+    </header>
 
-        <form id="order-form" method="post" class="space-y-6">
-            {% csrf_token %}
-
-            {% if form.non_field_errors %}
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-            {% if items_error %}
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
-                    {{ items_error }}
-                </div>
-            {% endif %}
-
-            <!-- TAB 1: CUSTOMER -->
-            <div id="tab-customer" class="tab-panel space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Customer Name
-                    </label>
-                    {{ form.customer_name }}
-                    {% for error in form.customer_name.errors %}
-                        <p class="text-sm text-red-600">{{ error }}</p>
-                    {% endfor %}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
-                    </label>
-                    {{ form.phone }}
-                    {% for error in form.phone.errors %}
-                        <p class="text-sm text-red-600">{{ error }}</p>
-                    {% endfor %}
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Address
-                    </label>
-                    {{ form.address }}
-                    {% for error in form.address.errors %}
-                        <p class="text-sm text-red-600">{{ error }}</p>
-                    {% endfor %}
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="button"
-                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                            onclick="showTab('products')">
-                        Next → Products
+    <!-- Main wrapper -->
+    <main class="w-full max-w-4xl px-4 pb-8 flex-1 flex">
+        <div class="w-full bg-slate-900/90 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.8)] border border-slate-800 flex flex-col overflow-hidden backdrop-blur">
+            <!-- Tab bar (always clickable, any tab -> any tab) -->
+            <div class="border-b border-slate-800 bg-slate-900/95 px-4 pt-4 pb-2 sticky top-0 z-20">
+                <div class="flex gap-2 text-xs font-medium">
+                    <button type="button" id="tab-btn-customer"
+                            onclick="showTab('customer')"
+                            class="tab-btn flex-1 inline-flex flex-col items-center justify-center gap-0.5 rounded-2xl py-2.5 px-2 bg-slate-900 text-indigo-300 border border-indigo-500/70 shadow-md">
+                        <span class="text-[11px] uppercase tracking-wide">Step 1</span>
+                        <span class="text-sm font-semibold">Customer</span>
+                    </button>
+                    <button type="button" id="tab-btn-products"
+                            onclick="showTab('products')"
+                            class="tab-btn flex-1 inline-flex flex-col items-center justify-center gap-0.5 rounded-2xl py-2.5 px-2 text-slate-400 border border-transparent">
+                        <span class="text-[11px] uppercase tracking-wide">Step 2</span>
+                        <span class="text-sm font-semibold">Products</span>
+                    </button>
+                    <button type="button" id="tab-btn-delivery"
+                            onclick="showTab('delivery')"
+                            class="tab-btn flex-1 inline-flex flex-col items-center justify-center gap-0.5 rounded-2xl py-2.5 px-2 text-slate-400 border border-transparent">
+                        <span class="text-[11px] uppercase tracking-wide">Step 3</span>
+                        <span class="text-sm font-semibold">Delivery</span>
                     </button>
                 </div>
             </div>
 
-            <!-- TAB 2: PRODUCTS -->
-            <div id="tab-products" class="tab-panel hidden space-y-4">
-                <!-- Quick product keyword buttons -->
-                <div>
-                    <p class="text-sm font-medium text-gray-700 mb-1">Quick product keywords</p>
-                    <div class="flex flex-wrap gap-2">
-                        <!-- Ei array ta tumi nijer product anusare change korba -->
-                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
-                                onclick="setTempKeyword('T-Shirt')">T-Shirt</button>
-                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
-                                onclick="setTempKeyword('Hoodie')">Hoodie</button>
-                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
-                                onclick="setTempKeyword('Mug')">Mug</button>
-                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
-                                onclick="setTempKeyword('Cap')">Cap</button>
-                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
-                                onclick="setTempKeyword('Bag')">Bag</button>
-                    </div>
+            <!-- Form -->
+            <form id="order-form" method="post" class="flex-1 flex flex-col overflow-hidden">
+                {% csrf_token %}
+
+                <!-- messages -->
+                <div class="px-5 pt-3 space-y-2">
+                    {% if form.non_field_errors %}
+                        <div class="bg-red-500/10 border border-red-500/40 text-red-200 px-3 py-2 rounded-xl text-xs">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    {% if items_error %}
+                        <div class="bg-red-500/10 border border-red-500/40 text-red-200 px-3 py-2 rounded-xl text-xs">
+                            {{ items_error }}
+                        </div>
+                    {% endif %}
                 </div>
 
-                <!-- Single product input area -->
-                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-end">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Product keyword
-                        </label>
-                        <input type="text" id="temp_keyword"
-                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                               placeholder="e.g. T-Shirt, Mug">
-                    </div>
+                <!-- scrollable content -->
+                <div class="flex-1 overflow-y-auto px-5 pb-5 space-y-8">
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Quantity
-                        </label>
-                        <div class="flex items-center border border-gray-300 rounded-md overflow-hidden">
-                            <button type="button"
-                                    class="w-10 h-10 flex items-center justify-center bg-gray-100"
-                                    onclick="changeTempQuantity(-1)">−
-                            </button>
-                            <input type="number" id="temp_quantity" value="1" min="1"
-                                   class="w-full text-center border-0 focus:ring-0" />
-                            <button type="button"
-                                    class="w-10 h-10 flex items-center justify-center bg-gray-100"
-                                    onclick="changeTempQuantity(1)">+
-                            </button>
+                    <!-- TAB 1: CUSTOMER -->
+                    <div id="tab-customer" class="tab-panel space-y-5">
+                        <h2 class="text-base font-semibold text-slate-50 mt-1">Customer details</h2>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-300">
+                                Customer Name
+                            </label>
+                            {{ form.customer_name }}
+                            {% for error in form.customer_name.errors %}
+                                <p class="text-[11px] text-red-300 mt-0.5">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-300">
+                                Phone Number
+                            </label>
+                            {{ form.phone }}
+                            {% for error in form.phone.errors %}
+                                <p class="text-[11px] text-red-300 mt-0.5">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-300">
+                                Address
+                            </label>
+                            {{ form.address }}
+                            <p class="text-[11px] text-slate-500 mt-0.5">
+                                Use clear area name (e.g. “Uttara, Dhaka”) for auto delivery detection.
+                            </p>
+                            {% for error in form.address.errors %}
+                                <p class="text-[11px] text-red-300 mt-0.5">{{ error }}</p>
+                            {% endfor %}
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Color
-                        </label>
-                        <input type="text" id="temp_color"
-                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                               placeholder="e.g. Red, Black">
-                        <div class="flex flex-wrap gap-2 mt-1">
+                    <!-- TAB 2: PRODUCTS -->
+                    <div id="tab-products" class="tab-panel hidden space-y-6">
+                        <div class="space-y-1">
+                            <h2 class="text-base font-semibold text-slate-50">Products</h2>
+                            <p class="text-[11px] text-slate-400">
+                                Select a keyword card, then fill quantity, color & price per piece. Press “Add selected”.
+                            </p>
+                        </div>
+
+                        <!-- Keyword cards -->
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            {% for kw in product_keywords %}
+                                <div class="border border-slate-700 rounded-3xl p-4 md:p-5 bg-slate-900/80 hover:bg-slate-800/90 transition-all duration-150 shadow-md">
+                                    <!-- header row -->
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox"
+                                                   id="kw_cb_{{ kw.id }}"
+                                                   class="quick-kw-checkbox h-5 w-5 text-indigo-400 border-slate-500 rounded focus:ring-indigo-500"
+                                                   data-name="{{ kw.name|escapejs }}"
+                                                   data-id="{{ kw.id }}"
+                                                   onchange="toggleKeywordDetails('{{ kw.id }}')">
+                                            <label for="kw_cb_{{ kw.id }}"
+                                                   class="text-sm md:text-base font-semibold text-slate-50 cursor-pointer">
+                                                {{ kw.name }}
+                                            </label>
+                                        </div>
+                                        <span class="text-[10px] uppercase tracking-wide text-slate-500">
+                                            Tap to use
+                                        </span>
+                                    </div>
+
+                                    <!-- details -->
+                                    <div id="kw_details_{{ kw.id }}"
+                                         class="space-y-3 rounded-2xl bg-slate-950/60 border border-slate-700 px-3.5 py-3 md:px-4 md:py-4 hidden">
+                                        <!-- qty -->
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="text-[11px] md:text-xs font-medium text-slate-300">Quantity</span>
+                                            <div class="flex items-center border border-slate-600 rounded-full overflow-hidden bg-slate-900">
+                                                <button type="button"
+                                                        class="px-3 text-sm bg-slate-800 hover:bg-slate-700 text-slate-100"
+                                                        onclick="changeQuickQty('{{ kw.id }}', -1)">−</button>
+                                                <input type="number"
+                                                       id="quick_qty_{{ kw.id }}"
+                                                       value="1"
+                                                       min="1"
+                                                       disabled
+                                                       class="w-16 text-center border-0 text-sm focus:ring-0 bg-slate-900 text-slate-50">
+                                                <button type="button"
+                                                        class="px-3 text-sm bg-slate-800 hover:bg-slate-700 text-slate-100"
+                                                        onclick="changeQuickQty('{{ kw.id }}', 1)">+</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- color -->
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="text-[11px] md:text-xs font-medium text-slate-300">Color</span>
+                                            <select id="quick_color_{{ kw.id }}"
+                                                    disabled
+                                                    class="flex-1 text-xs md:text-sm">
+                                                <option value="">Select color</option>
+                                                {% for c in color_options %}
+                                                    <option value="{{ c.name }}">{{ c.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <!-- price -->
+                                        <div class="flex items-center justify-between gap-3">
+                                            <span class="text-[11px] md:text-xs font-medium text-slate-300 whitespace-nowrap">Price / pc (Tk)</span>
+                                            <input type="number"
+                                                   step="0.01"
+                                                   id="quick_price_{{ kw.id }}"
+                                                   disabled
+                                                   class="w-28 text-xs md:text-sm"
+                                                   placeholder="500">
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-xs text-slate-400">
+                                    No quick keywords yet. Add from admin → Product keywords.
+                                </p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- actions -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-1">
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button"
+                                        class="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-medium border border-slate-600 bg-slate-900 text-slate-200 hover:bg-slate-800 active:scale-[0.98] transition"
+                                        onclick="resetKeywordSelections()">
+                                    Reset selections
+                                </button>
+                                <button type="button"
+                                        class="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-medium border border-slate-600 bg-slate-900 text-slate-200 hover:bg-slate-800 active:scale-[0.98] transition"
+                                        onclick="clearAllItems()">
+                                    Clear added products
+                                </button>
+                            </div>
+
                             <button type="button"
-                                    class="px-2 py-1 rounded-full bg-red-100 text-xs"
-                                    onclick="setTempColor('Red')">Red</button>
-                            <button type="button"
-                                    class="px-2 py-1 rounded-full bg-black text-white text-xs"
-                                    onclick="setTempColor('Black')">Black</button>
-                            <button type="button"
-                                    class="px-2 py-1 rounded-full bg-gray-200 text-xs"
-                                    onclick="setTempColor('White')">White</button>
+                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-slate-900 bg-emerald-400 hover:bg-emerald-300 shadow-md active:scale-[0.98] transition"
+                                    onclick="addSelectedQuickKeywords()">
+                                + Add selected keywords
+                            </button>
+                        </div>
+
+                        <!-- product list -->
+                        <div class="mt-4 space-y-2">
+                            <h3 class="text-sm font-semibold text-slate-50">Products in this order</h3>
+                            <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-slate-800 text-sm">
+                                        <thead class="bg-slate-900">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">#</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Keyword</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Qty</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Color</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Amount</th>
+                                            <th class="px-3 py-2"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="items_table_body" class="divide-y divide-slate-800">
+                                        <!-- JS rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Amount (per line)
-                        </label>
-                        <input type="number" step="0.01" id="temp_amount"
-                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                               placeholder="e.g. 500">
+                    <!-- TAB 3: DELIVERY -->
+                    <div id="tab-delivery" class="tab-panel hidden space-y-6">
+                        <h2 class="text-base font-semibold text-slate-50">Delivery & Total</h2>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                Extra info / delivery note
+                            </label>
+                            {{ form.extra_info }}
+                            {% for error in form.extra_info.errors %}
+                                <p class="text-[11px] text-red-300 mt-0.5">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- delivery area -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-semibold text-slate-300">
+                                    Delivery area
+                                </label>
+                                <button type="button"
+                                        class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium"
+                                        onclick="detectDeliveryFromAddress(false)">
+                                    Auto-detect from address
+                                </button>
+                            </div>
+                            <div class="space-y-1.5 rounded-2xl border border-slate-700 bg-slate-900 px-3 py-2.5">
+                                {% with selected=selected_delivery_area|default:'inside_dhaka' %}
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="radio" name="delivery_area" value="inside_dhaka"
+                                               class="h-4 w-4 text-indigo-400 border-slate-500"
+                                               {% if selected == 'inside_dhaka' %}checked{% endif %}
+                                               onclick="onDeliveryAreaChange()">
+                                        <span class="flex-1 flex items-center justify-between">
+                                            <span>Inside Dhaka</span>
+                                            <span class="text-xs text-slate-400">60 Tk</span>
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="radio" name="delivery_area" value="dhaka_sub_area"
+                                               class="h-4 w-4 text-indigo-400 border-slate-500"
+                                               {% if selected == 'dhaka_sub_area' %}checked{% endif %}
+                                               onclick="onDeliveryAreaChange()">
+                                        <span class="flex-1 flex items-center justify-between">
+                                            <span>Dhaka sub-area</span>
+                                            <span class="text-xs text-slate-400">100 Tk</span>
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="radio" name="delivery_area" value="outside_dhaka"
+                                               class="h-4 w-4 text-indigo-400 border-slate-500"
+                                               {% if selected == 'outside_dhaka' %}checked{% endif %}
+                                               onclick="onDeliveryAreaChange()">
+                                        <span class="flex-1 flex items-center justify-between">
+                                            <span>Outside Dhaka</span>
+                                            <span class="text-xs text-slate-400">120 Tk</span>
+                                        </span>
+                                    </label>
+                                {% endwith %}
+                            </div>
+                            {% for error in form.delivery_area.errors %}
+                                <p class="text-[11px] text-red-300 mt-0.5">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- summary -->
+                        <div class="space-y-2">
+                            <h3 class="text-sm font-semibold text-slate-50">Product summary</h3>
+                            <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-slate-800 text-sm">
+                                        <thead class="bg-slate-900">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">#</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Keyword</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Qty</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Color</th>
+                                            <th class="px-3 py-2 text-left font-medium text-slate-300 text-xs">Amount</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="summary_table_body" class="divide-y divide-slate-800">
+                                        <!-- JS rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- totals -->
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div class="space-y-1.5 text-sm text-slate-100 rounded-2xl border border-slate-700 bg-slate-900 px-3 py-2.5">
+                                <div class="flex justify-between">
+                                    <span>Items subtotal</span>
+                                    <span id="items_subtotal_text" class="font-semibold">0.00</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Delivery charge</span>
+                                    <span id="delivery_charge_text" class="font-semibold">0.00</span>
+                                </div>
+                                <div class="flex justify-between border-top border-slate-700 pt-1.5 mt-1 border-t">
+                                    <span>Suggested total</span>
+                                    <span id="suggested_total_text" class="font-bold text-emerald-300">0.00</span>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                    Final total amount (editable)
+                                </label>
+                                <input type="number" step="0.01" name="total_amount" id="total_amount_input"
+                                       class="block w-full text-sm"
+                                       placeholder="Auto-calculated, but you can edit for discount">
+                                {% for error in form.total_amount.errors %}
+                                    <p class="text-[11px] text-red-300 mt-0.5">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="items_json" id="items_json">
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center">
-                    <div class="space-x-2">
+                <!-- bottom bar: quick tab access + submit -->
+                <div class="border-t border-slate-800 bg-slate-900/95 px-5 py-3 flex items-center justify-between gap-2">
+                    <div class="flex gap-1.5">
                         <button type="button"
-                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-md bg-white hover:bg-gray-50"
-                                onclick="clearTempFields()">
-                            Clear current
+                                class="px-3 py-2 rounded-full text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 active:scale-[0.98] transition"
+                                onclick="showTab('customer')">
+                            Customer
                         </button>
                         <button type="button"
-                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-md bg-white hover:bg-gray-50"
-                                onclick="clearAllItems()">
-                            Clear all products
+                                class="px-3 py-2 rounded-full text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 active:scale-[0.98] transition"
+                                onclick="showTab('products')">
+                            Products
+                        </button>
+                        <button type="button"
+                                class="px-3 py-2 rounded-full text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 active:scale-[0.98] transition"
+                                onclick="showTab('delivery')">
+                            Delivery
                         </button>
                     </div>
-
-                    <button type="button"
-                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
-                            onclick="addTempItem()">
-                        + Add product to list
-                    </button>
-                </div>
-
-                <!-- Product list table -->
-                <div class="mt-4">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">Products in this order</h3>
-                    <div class="border border-gray-200 rounded-md overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">#</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Keyword</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Qty</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Color</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Amount</th>
-                                <th class="px-3 py-2"></th>
-                            </tr>
-                            </thead>
-                            <tbody id="items_table_body" class="divide-y divide-gray-100">
-                            <!-- JS diye fill hobe -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="flex justify-between">
-                    <button type="button"
-                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50"
-                            onclick="showTab('customer')">
-                        ← Back to Customer
-                    </button>
-
-                    <button type="button"
-                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                            onclick="goToDeliveryTab()">
-                        Next → Delivery
-                    </button>
-                </div>
-            </div>
-
-            <!-- TAB 3: DELIVERY & SUBMIT -->
-            <div id="tab-delivery" class="tab-panel hidden space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Extra info / delivery note
-                    </label>
-                    {{ form.extra_info }}
-                    {% for error in form.extra_info.errors %}
-                        <p class="text-sm text-red-600">{{ error }}</p>
-                    {% endfor %}
-                </div>
-
-                <!-- Summary of products -->
-                <div>
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">Product summary</h3>
-                    <div class="border border-gray-200 rounded-md overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">#</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Keyword</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Qty</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Color</th>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700">Amount</th>
-                            </tr>
-                            </thead>
-                            <tbody id="summary_table_body" class="divide-y divide-gray-100">
-                            <!-- JS diye fill hobe -->
-                            </tbody>
-                            <tfoot class="bg-gray-50">
-                            <tr>
-                                <td colspan="4" class="px-3 py-2 text-right font-semibold text-gray-700">
-                                    Total
-                                </td>
-                                <td class="px-3 py-2 font-semibold text-gray-900" id="summary_total_cell">
-                                    0
-                                </td>
-                            </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Hidden input: JSON of all items -->
-                <input type="hidden" name="items_json" id="items_json">
-
-                <div class="flex justify-between items-center">
-                    <button type="button"
-                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50"
-                            onclick="showTab('products')">
-                        ← Back to Products
-                    </button>
-
                     <button type="submit"
-                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
-                        Submit Order
+                            class="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-xs font-semibold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-md active:scale-[0.98] transition">
+                        Submit order
                     </button>
                 </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    </main>
 </div>
 
 <script>
@@ -294,20 +446,33 @@ function showTab(name) {
     panels.forEach(p => {
         const panel = document.getElementById('tab-' + p);
         const btn = document.getElementById('tab-btn-' + p);
-        if (p === name) {
-            panel.classList.remove('hidden');
-            btn.classList.add('border-indigo-500', 'text-indigo-600');
-            btn.classList.remove('border-transparent', 'text-gray-500');
-        } else {
-            panel.classList.add('hidden');
-            btn.classList.remove('border-indigo-500', 'text-indigo-600');
-            btn.classList.add('border-transparent', 'text-gray-500');
+        if (panel) {
+            if (p === name) panel.classList.remove('hidden');
+            else panel.classList.add('hidden');
+        }
+        if (btn) {
+            if (p === name) {
+                btn.classList.add('bg-slate-900', 'text-indigo-300', 'border-indigo-500/70', 'shadow-md');
+                btn.classList.remove('text-slate-400', 'border-transparent');
+            } else {
+                btn.classList.remove('bg-slate-900', 'text-indigo-300', 'border-indigo-500/70', 'shadow-md');
+                btn.classList.add('text-slate-400', 'border-transparent');
+            }
         }
     });
 }
 
+// ----------------- DELIVERY CHARGES -----------------
+const DELIVERY_CHARGES = {
+    'inside_dhaka': 60,
+    'dhaka_sub_area': 100,
+    'outside_dhaka': 120,
+};
+
 // ----------------- PRODUCT ITEMS STATE -----------------
 let items = [];
+let itemsSubtotal = 0;
+let totalAmountManuallyEdited = false;
 
 // initial data from server (if POST error)
 const initialItemsJson = '{{ items_json|default:"[]"|escapejs }}';
@@ -320,50 +485,80 @@ try {
     items = [];
 }
 
-// temp field helpers
-function setTempKeyword(text) {
-    document.getElementById('temp_keyword').value = text;
+// keyword card helpers
+function toggleKeywordDetails(id) {
+    const checkbox = document.querySelector('.quick-kw-checkbox[data-id="' + id + '"]');
+    const details = document.getElementById('kw_details_' + id);
+    const qtyInput = document.getElementById('quick_qty_' + id);
+    const colorSelect = document.getElementById('quick_color_' + id);
+    const priceInput = document.getElementById('quick_price_' + id);
+
+    const active = checkbox && checkbox.checked;
+
+    if (details) {
+        if (active) details.classList.remove('hidden');
+        else details.classList.add('hidden');
+    }
+
+    [qtyInput, colorSelect, priceInput].forEach(function (el) {
+        if (el) el.disabled = !active;
+    });
 }
-function setTempColor(text) {
-    document.getElementById('temp_color').value = text;
-}
-function changeTempQuantity(delta) {
-    const el = document.getElementById('temp_quantity');
+
+function changeQuickQty(id, delta) {
+    const el = document.getElementById('quick_qty_' + id);
+    if (!el) return;
     let v = parseInt(el.value || '1', 10);
     if (isNaN(v)) v = 1;
     v += delta;
-    if (v <= 0) v = 1;
+    if (v < 1) v = 1;
     el.value = v;
 }
-function clearTempFields() {
-    document.getElementById('temp_keyword').value = '';
-    document.getElementById('temp_quantity').value = 1;
-    document.getElementById('temp_color').value = '';
-    document.getElementById('temp_amount').value = '';
+
+// reset all keyword selections
+function resetKeywordSelections() {
+    const checkboxes = document.querySelectorAll('.quick-kw-checkbox');
+    checkboxes.forEach(function (cb) {
+        cb.checked = false;
+        toggleKeywordDetails(cb.dataset.id);
+    });
 }
 
-// add one item to items[]
-function addTempItem() {
-    const kw = document.getElementById('temp_keyword').value.trim();
-    if (!kw) {
-        alert('Please enter a product keyword.');
+// add all selected quick keywords at once
+function addSelectedQuickKeywords() {
+    const checkboxes = document.querySelectorAll('.quick-kw-checkbox:checked');
+    if (!checkboxes.length) {
+        alert('Please select at least one keyword.');
         return;
     }
-    let qty = parseInt(document.getElementById('temp_quantity').value || '1', 10);
-    if (isNaN(qty) || qty <= 0) qty = 1;
-    const color = document.getElementById('temp_color').value.trim();
-    const amountStr = document.getElementById('temp_amount').value;
-    let amount = parseFloat(amountStr || '0');
-    if (isNaN(amount)) amount = 0;
 
-    items.push({
-        product_keyword: kw,
-        quantity: qty,
-        color: color,
-        amount: amount
+    checkboxes.forEach(function (cb) {
+        const id = cb.dataset.id;
+        const name = cb.dataset.name;
+
+        const qtyInput = document.getElementById('quick_qty_' + id);
+        const colorSelect = document.getElementById('quick_color_' + id);
+        const priceInput = document.getElementById('quick_price_' + id);
+
+        let qty = parseInt(qtyInput ? qtyInput.value : '1', 10);
+        if (isNaN(qty) || qty <= 0) qty = 1;
+
+        const color = colorSelect ? (colorSelect.value || '').trim() : '';
+
+        let unitPrice = parseFloat(priceInput && priceInput.value ? priceInput.value : '0');
+        if (isNaN(unitPrice)) unitPrice = 0;
+
+        const lineAmount = unitPrice * qty;
+
+        items.push({
+            product_keyword: name,
+            quantity: qty,
+            color: color,
+            amount: lineAmount
+        });
     });
 
-    clearTempFields();
+    resetKeywordSelections();
     renderItems();
     showTab('products');
 }
@@ -379,30 +574,30 @@ function clearAllItems() {
     renderItems();
 }
 
-// render items in main table & summary
+// render items in main table & summary + totals
 function renderItems() {
     const tbody = document.getElementById('items_table_body');
     const sbody = document.getElementById('summary_table_body');
-    const totalCell = document.getElementById('summary_total_cell');
     const jsonInput = document.getElementById('items_json');
 
     tbody.innerHTML = '';
     sbody.innerHTML = '';
 
-    let total = 0;
+    itemsSubtotal = 0;
 
-    items.forEach((item, idx) => {
-        // main table
+    items.forEach(function (item, idx) {
+        const amountNum = Number(item.amount || 0);
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td class="px-3 py-2">${idx + 1}</td>
-            <td class="px-3 py-2">${item.product_keyword}</td>
-            <td class="px-3 py-2">${item.quantity}</td>
-            <td class="px-3 py-2">${item.color || '-'}</td>
-            <td class="px-3 py-2">${item.amount.toFixed ? item.amount.toFixed(2) : item.amount}</td>
+            <td class="px-3 py-2 text-xs">${idx + 1}</td>
+            <td class="px-3 py-2 text-xs">${item.product_keyword}</td>
+            <td class="px-3 py-2 text-xs">${item.quantity}</td>
+            <td class="px-3 py-2 text-xs">${item.color || '-'}</td>
+            <td class="px-3 py-2 text-xs">${amountNum.toFixed(2)}</td>
             <td class="px-3 py-2 text-right">
                 <button type="button"
-                        class="text-xs text-red-600 hover:text-red-800"
+                        class="text-[11px] text-red-300 hover:text-red-200"
                         onclick="deleteItem(${idx})">
                     Remove
                 </button>
@@ -410,31 +605,102 @@ function renderItems() {
         `;
         tbody.appendChild(tr);
 
-        // summary table
         const tr2 = document.createElement('tr');
         tr2.innerHTML = `
-            <td class="px-3 py-2">${idx + 1}</td>
-            <td class="px-3 py-2">${item.product_keyword}</td>
-            <td class="px-3 py-2">${item.quantity}</td>
-            <td class="px-3 py-2">${item.color || '-'}</td>
-            <td class="px-3 py-2">${item.amount.toFixed ? item.amount.toFixed(2) : item.amount}</td>
+            <td class="px-3 py-2 text-xs">${idx + 1}</td>
+            <td class="px-3 py-2 text-xs">${item.product_keyword}</td>
+            <td class="px-3 py-2 text-xs">${item.quantity}</td>
+            <td class="px-3 py-2 text-xs">${item.color || '-'}</td>
+            <td class="px-3 py-2 text-xs">${amountNum.toFixed(2)}</td>
         `;
         sbody.appendChild(tr2);
 
-        total += (parseFloat(item.amount) || 0);
+        itemsSubtotal += amountNum;
     });
 
-    totalCell.textContent = total.toFixed(2);
     jsonInput.value = JSON.stringify(items);
+    updateTotals();
+}
+
+// totals UI update
+function updateTotals() {
+    const subtotalSpan = document.getElementById('items_subtotal_text');
+    const deliverySpan = document.getElementById('delivery_charge_text');
+    const suggestedSpan = document.getElementById('suggested_total_text');
+    const totalInput = document.getElementById('total_amount_input');
+
+    const subtotal = itemsSubtotal || 0;
+    subtotalSpan.textContent = subtotal.toFixed(2);
+
+    const selected = document.querySelector('input[name="delivery_area"]:checked');
+    let deliveryCharge = 0;
+    if (selected && DELIVERY_CHARGES[selected.value] !== undefined) {
+        deliveryCharge = DELIVERY_CHARGES[selected.value];
+    }
+    deliverySpan.textContent = deliveryCharge.toFixed(2);
+
+    const suggested = subtotal + deliveryCharge;
+    suggestedSpan.textContent = suggested.toFixed(2);
+
+    if (!totalAmountManuallyEdited || !totalInput.value) {
+        totalInput.value = suggested.toFixed(2);
+    }
+}
+
+function onDeliveryAreaChange() {
+    updateTotals();
+}
+
+// auto detect delivery area from address
+function detectDeliveryFromAddress(onlyIfEmpty) {
+    const addressField = document.querySelector('textarea[name="address"]');
+    if (!addressField) return;
+
+    const currentSelected = document.querySelector('input[name="delivery_area"]:checked');
+    if (onlyIfEmpty && currentSelected) {
+        updateTotals();
+        return;
+    }
+
+    const text = addressField.value.toLowerCase();
+
+    const insideKeywords = [
+        'uttara', 'banani', 'dhanmondi', 'mirpur', 'badda',
+        'motijheel', 'gulshan', 'mohakhali', 'shyamoli',
+        'mohammadpur', 'tejgaon', 'farmgate', 'ramna',
+        'kakrail', 'khilkhet', 'khilgaon', 'jatrabari',
+        'rampura', 'malibagh', 'shantinagar', 'paltan',
+        'bansree', 'uttarkhan', 'dakshinkhan', 'demra',
+    ];
+    const subAreaKeywords = [
+        'savar', 'ashulia', 'gazipur', 'tonggi', 'tonggi',
+        'narayanganj', 'keraniganj', 'nobinagar', 'nabinagar',
+        'joydebpur', 'joydevpur',
+    ];
+
+    let area = 'outside_dhaka';
+    if (insideKeywords.some(function (k) { return text.includes(k); })) {
+        area = 'inside_dhaka';
+    } else if (subAreaKeywords.some(function (k) { return text.includes(k); })) {
+        area = 'dhaka_sub_area';
+    }
+
+    const radio = document.querySelector('input[name="delivery_area"][value="' + area + '"]');
+    if (radio) {
+        radio.checked = true;
+    }
+    updateTotals();
 }
 
 // go to delivery tab but check products exist
 function goToDeliveryTab() {
     if (items.length === 0) {
-        alert('Please add at least one product before going to delivery.');
+        alert('Please add at least one product.');
+        showTab('products');
         return;
     }
-    renderItems();  // ensure summary up-to-date
+    renderItems();
+    detectDeliveryFromAddress(true);
     showTab('delivery');
 }
 
@@ -446,11 +712,18 @@ document.getElementById('order-form').addEventListener('submit', function (e) {
         e.preventDefault();
         return;
     }
-    renderItems(); // final sync
+    renderItems();
 });
 
-// initial render
+// track manual edit of total
 document.addEventListener('DOMContentLoaded', function () {
+    const totalInput = document.getElementById('total_amount_input');
+    if (totalInput) {
+        totalInput.addEventListener('input', function () {
+            totalAmountManuallyEdited = true;
+        });
+    }
+
     renderItems();
     showTab('customer');
 });

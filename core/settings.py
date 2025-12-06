@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -101,6 +103,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# core/settings.py
+
+JAZZMIN_SETTINGS = {
+    "site_title": "OrderApp Admin",
+    "site_header": "OrderApp",
+    "site_brand": "OrderApp",
+    "welcome_sign": "Welcome to OrderApp admin",
+    "copyright": "OrderApp",
+
+    # Top-right logo iccha hole
+    "site_logo": None,  # future e static path dile hobe
+
+    # Menu te sudhu tomader app important
+    "order_with_respect_to": ["orders"],
+
+    # Default theme (dark feel) – Jazzmin docs e aro option pabe
+    "theme": "slate",          # dark-ish
+    "dark_mode_theme": "darkly",
+
+    # Some clutter off
+    "show_ui_builder": False,
+    "show_sidebar": True,
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
