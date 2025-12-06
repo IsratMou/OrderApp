@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Order</title>
+    <!-- Tailwind (CDN, easiest) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<div class="max-w-5xl mx-auto py-8 px-4">
+    <h1 class="text-2xl font-bold mb-6 text-center">New Order</h1>
+
+    <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-4">
+            <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                <button type="button" id="tab-btn-customer"
+                        class="tab-btn border-indigo-500 text-indigo-600 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm"
+                        onclick="showTab('customer')">
+                    1. Customer
+                </button>
+                <button type="button" id="tab-btn-products"
+                        class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm"
+                        onclick="showTab('products')">
+                    2. Products
+                </button>
+                <button type="button" id="tab-btn-delivery"
+                        class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm"
+                        onclick="showTab('delivery')">
+                    3. Delivery & Submit
+                </button>
+            </nav>
+        </div>
+
+        <form id="order-form" method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            {% if items_error %}
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
+                    {{ items_error }}
+                </div>
+            {% endif %}
+
+            <!-- TAB 1: CUSTOMER -->
+            <div id="tab-customer" class="tab-panel space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Customer Name
+                    </label>
+                    {{ form.customer_name }}
+                    {% for error in form.customer_name.errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number
+                    </label>
+                    {{ form.phone }}
+                    {% for error in form.phone.errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Address
+                    </label>
+                    {{ form.address }}
+                    {% for error in form.address.errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                            onclick="showTab('products')">
+                        Next → Products
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: PRODUCTS -->
+            <div id="tab-products" class="tab-panel hidden space-y-4">
+                <!-- Quick product keyword buttons -->
+                <div>
+                    <p class="text-sm font-medium text-gray-700 mb-1">Quick product keywords</p>
+                    <div class="flex flex-wrap gap-2">
+                        <!-- Ei array ta tumi nijer product anusare change korba -->
+                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
+                                onclick="setTempKeyword('T-Shirt')">T-Shirt</button>
+                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
+                                onclick="setTempKeyword('Hoodie')">Hoodie</button>
+                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
+                                onclick="setTempKeyword('Mug')">Mug</button>
+                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
+                                onclick="setTempKeyword('Cap')">Cap</button>
+                        <button type="button" class="keyword-btn px-3 py-1 rounded-full bg-gray-100 text-sm"
+                                onclick="setTempKeyword('Bag')">Bag</button>
+                    </div>
+                </div>
+
+                <!-- Single product input area -->
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Product keyword
+                        </label>
+                        <input type="text" id="temp_keyword"
+                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               placeholder="e.g. T-Shirt, Mug">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Quantity
+                        </label>
+                        <div class="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                            <button type="button"
+                                    class="w-10 h-10 flex items-center justify-center bg-gray-100"
+                                    onclick="changeTempQuantity(-1)">−
+                            </button>
+                            <input type="number" id="temp_quantity" value="1" min="1"
+                                   class="w-full text-center border-0 focus:ring-0" />
+                            <button type="button"
+                                    class="w-10 h-10 flex items-center justify-center bg-gray-100"
+                                    onclick="changeTempQuantity(1)">+
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Color
+                        </label>
+                        <input type="text" id="temp_color"
+                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               placeholder="e.g. Red, Black">
+                        <div class="flex flex-wrap gap-2 mt-1">
+                            <button type="button"
+                                    class="px-2 py-1 rounded-full bg-red-100 text-xs"
+                                    onclick="setTempColor('Red')">Red</button>
+                            <button type="button"
+                                    class="px-2 py-1 rounded-full bg-black text-white text-xs"
+                                    onclick="setTempColor('Black')">Black</button>
+                            <button type="button"
+                                    class="px-2 py-1 rounded-full bg-gray-200 text-xs"
+                                    onclick="setTempColor('White')">White</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Amount (per line)
+                        </label>
+                        <input type="number" step="0.01" id="temp_amount"
+                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               placeholder="e.g. 500">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <div class="space-x-2">
+                        <button type="button"
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-md bg-white hover:bg-gray-50"
+                                onclick="clearTempFields()">
+                            Clear current
+                        </button>
+                        <button type="button"
+                                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm rounded-md bg-white hover:bg-gray-50"
+                                onclick="clearAllItems()">
+                            Clear all products
+                        </button>
+                    </div>
+
+                    <button type="button"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
+                            onclick="addTempItem()">
+                        + Add product to list
+                    </button>
+                </div>
+
+                <!-- Product list table -->
+                <div class="mt-4">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Products in this order</h3>
+                    <div class="border border-gray-200 rounded-md overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">#</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Keyword</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Qty</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Color</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Amount</th>
+                                <th class="px-3 py-2"></th>
+                            </tr>
+                            </thead>
+                            <tbody id="items_table_body" class="divide-y divide-gray-100">
+                            <!-- JS diye fill hobe -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button type="button"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50"
+                            onclick="showTab('customer')">
+                        ← Back to Customer
+                    </button>
+
+                    <button type="button"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                            onclick="goToDeliveryTab()">
+                        Next → Delivery
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 3: DELIVERY & SUBMIT -->
+            <div id="tab-delivery" class="tab-panel hidden space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Extra info / delivery note
+                    </label>
+                    {{ form.extra_info }}
+                    {% for error in form.extra_info.errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Summary of products -->
+                <div>
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Product summary</h3>
+                    <div class="border border-gray-200 rounded-md overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">#</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Keyword</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Qty</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Color</th>
+                                <th class="px-3 py-2 text-left font-medium text-gray-700">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody id="summary_table_body" class="divide-y divide-gray-100">
+                            <!-- JS diye fill hobe -->
+                            </tbody>
+                            <tfoot class="bg-gray-50">
+                            <tr>
+                                <td colspan="4" class="px-3 py-2 text-right font-semibold text-gray-700">
+                                    Total
+                                </td>
+                                <td class="px-3 py-2 font-semibold text-gray-900" id="summary_total_cell">
+                                    0
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Hidden input: JSON of all items -->
+                <input type="hidden" name="items_json" id="items_json">
+
+                <div class="flex justify-between items-center">
+                    <button type="button"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50"
+                            onclick="showTab('products')">
+                        ← Back to Products
+                    </button>
+
+                    <button type="submit"
+                            class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                        Submit Order
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// ----------------- TAB SWITCHING -----------------
+function showTab(name) {
+    const panels = ['customer', 'products', 'delivery'];
+    panels.forEach(p => {
+        const panel = document.getElementById('tab-' + p);
+        const btn = document.getElementById('tab-btn-' + p);
+        if (p === name) {
+            panel.classList.remove('hidden');
+            btn.classList.add('border-indigo-500', 'text-indigo-600');
+            btn.classList.remove('border-transparent', 'text-gray-500');
+        } else {
+            panel.classList.add('hidden');
+            btn.classList.remove('border-indigo-500', 'text-indigo-600');
+            btn.classList.add('border-transparent', 'text-gray-500');
+        }
+    });
+}
+
+// ----------------- PRODUCT ITEMS STATE -----------------
+let items = [];
+
+// initial data from server (if POST error)
+const initialItemsJson = '{{ items_json|default:"[]"|escapejs }}';
+try {
+    const parsed = JSON.parse(initialItemsJson);
+    if (Array.isArray(parsed)) {
+        items = parsed;
+    }
+} catch (e) {
+    items = [];
+}
+
+// temp field helpers
+function setTempKeyword(text) {
+    document.getElementById('temp_keyword').value = text;
+}
+function setTempColor(text) {
+    document.getElementById('temp_color').value = text;
+}
+function changeTempQuantity(delta) {
+    const el = document.getElementById('temp_quantity');
+    let v = parseInt(el.value || '1', 10);
+    if (isNaN(v)) v = 1;
+    v += delta;
+    if (v <= 0) v = 1;
+    el.value = v;
+}
+function clearTempFields() {
+    document.getElementById('temp_keyword').value = '';
+    document.getElementById('temp_quantity').value = 1;
+    document.getElementById('temp_color').value = '';
+    document.getElementById('temp_amount').value = '';
+}
+
+// add one item to items[]
+function addTempItem() {
+    const kw = document.getElementById('temp_keyword').value.trim();
+    if (!kw) {
+        alert('Please enter a product keyword.');
+        return;
+    }
+    let qty = parseInt(document.getElementById('temp_quantity').value || '1', 10);
+    if (isNaN(qty) || qty <= 0) qty = 1;
+    const color = document.getElementById('temp_color').value.trim();
+    const amountStr = document.getElementById('temp_amount').value;
+    let amount = parseFloat(amountStr || '0');
+    if (isNaN(amount)) amount = 0;
+
+    items.push({
+        product_keyword: kw,
+        quantity: qty,
+        color: color,
+        amount: amount
+    });
+
+    clearTempFields();
+    renderItems();
+    showTab('products');
+}
+
+function deleteItem(index) {
+    items.splice(index, 1);
+    renderItems();
+}
+
+function clearAllItems() {
+    if (!confirm('Remove all products from this order?')) return;
+    items = [];
+    renderItems();
+}
+
+// render items in main table & summary
+function renderItems() {
+    const tbody = document.getElementById('items_table_body');
+    const sbody = document.getElementById('summary_table_body');
+    const totalCell = document.getElementById('summary_total_cell');
+    const jsonInput = document.getElementById('items_json');
+
+    tbody.innerHTML = '';
+    sbody.innerHTML = '';
+
+    let total = 0;
+
+    items.forEach((item, idx) => {
+        // main table
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="px-3 py-2">${idx + 1}</td>
+            <td class="px-3 py-2">${item.product_keyword}</td>
+            <td class="px-3 py-2">${item.quantity}</td>
+            <td class="px-3 py-2">${item.color || '-'}</td>
+            <td class="px-3 py-2">${item.amount.toFixed ? item.amount.toFixed(2) : item.amount}</td>
+            <td class="px-3 py-2 text-right">
+                <button type="button"
+                        class="text-xs text-red-600 hover:text-red-800"
+                        onclick="deleteItem(${idx})">
+                    Remove
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+
+        // summary table
+        const tr2 = document.createElement('tr');
+        tr2.innerHTML = `
+            <td class="px-3 py-2">${idx + 1}</td>
+            <td class="px-3 py-2">${item.product_keyword}</td>
+            <td class="px-3 py-2">${item.quantity}</td>
+            <td class="px-3 py-2">${item.color || '-'}</td>
+            <td class="px-3 py-2">${item.amount.toFixed ? item.amount.toFixed(2) : item.amount}</td>
+        `;
+        sbody.appendChild(tr2);
+
+        total += (parseFloat(item.amount) || 0);
+    });
+
+    totalCell.textContent = total.toFixed(2);
+    jsonInput.value = JSON.stringify(items);
+}
+
+// go to delivery tab but check products exist
+function goToDeliveryTab() {
+    if (items.length === 0) {
+        alert('Please add at least one product before going to delivery.');
+        return;
+    }
+    renderItems();  // ensure summary up-to-date
+    showTab('delivery');
+}
+
+// prevent form submit if no items
+document.getElementById('order-form').addEventListener('submit', function (e) {
+    if (items.length === 0) {
+        alert('Please add at least one product.');
+        showTab('products');
+        e.preventDefault();
+        return;
+    }
+    renderItems(); // final sync
+});
+
+// initial render
+document.addEventListener('DOMContentLoaded', function () {
+    renderItems();
+    showTab('customer');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order submitted</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<div class="max-w-xl mx-auto py-16 px-4 text-center">
+    <div class="bg-white shadow rounded-lg p-8">
+        <h1 class="text-2xl font-bold mb-4 text-green-600">Order submitted!</h1>
+        <p class="text-gray-700 mb-6">
+            Your order has been saved successfully.
+        </p>
+        <div class="space-x-3">
+            <a href="{% url 'new_order' %}"
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                New order
+            </a>
+            <a href="/admin/"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md bg-white hover:bg-gray-50">
+                Admin panel
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
